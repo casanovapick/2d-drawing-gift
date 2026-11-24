@@ -28,6 +28,7 @@ export class GachaponMachine {
 
     this.width = 420;
     this.height = 520;
+    this.zoomScale = 1;
     this.dpr = Math.min(window.devicePixelRatio || 1, 2);
 
     this.balls = [];
@@ -91,11 +92,20 @@ export class GachaponMachine {
     return globeR * 0.098;
   }
 
+  setZoomScale(scale) {
+    const next = Math.max(0.25, Math.min(4, Number(scale) || 1));
+    if (Math.abs(this.zoomScale - next) > 0.001) {
+      this.zoomScale = next;
+      this.resize();
+    }
+  }
+
   resize(customWidth, customHeight) {
-    const rect = this.canvas.parentElement?.getBoundingClientRect();
-    this.width = customWidth || Math.max(300, Math.min(460, rect?.width || 400));
+    const layoutWidth = this.canvas.parentElement?.clientWidth || 400;
+    this.width = customWidth || Math.max(300, Math.min(460, layoutWidth));
     this.height = customHeight || Math.round(this.width * 1.22);
-    this.dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const baseDpr = window.devicePixelRatio || 1;
+    this.dpr = Math.min(4, baseDpr * Math.max(1, this.zoomScale));
 
     this.canvas.width = Math.round(this.width * this.dpr);
     this.canvas.height = Math.round(this.height * this.dpr);
@@ -116,15 +126,22 @@ export class GachaponMachine {
     }
   }
 
+  getLogicalPointerPos(e) {
+    const rect = this.canvas.getBoundingClientRect();
+    if (!rect.width || !rect.height) return { x: -999, y: -999 };
+    return {
+      x: ((e.clientX - rect.left) / rect.width) * this.width,
+      y: ((e.clientY - rect.top) / rect.height) * this.height,
+    };
+  }
+
   handlePointerMove(e) {
     if (!this.canInteract) {
       this.hoveredInteractive = false;
       this.canvas.style.cursor = 'default';
       return;
     }
-    const rect = this.canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const { x, y } = this.getLogicalPointerPos(e);
     const { crankCx, crankCy, crankR } = this.getGeometry();
     const dist = Math.hypot(x - crankCx, y - crankCy);
     this.hoveredInteractive = dist <= crankR * 1.45;
@@ -133,9 +150,7 @@ export class GachaponMachine {
 
   handlePointerDown(e) {
     if (!this.canInteract) return;
-    const rect = this.canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    const { x, y } = this.getLogicalPointerPos(e);
     const { crankCx, crankCy, crankR } = this.getGeometry();
     const dist = Math.hypot(x - crankCx, y - crankCy);
     if (dist <= crankR * 1.55 && this.onCrankClick) {

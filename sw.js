@@ -1,4 +1,4 @@
-const CACHE_NAME = 'kawaii-gachapon-offline-v2';
+const CACHE_NAME = 'kawaii-gachapon-offline-v3';
 
 const VOICE_FILES = [
   'd_0', 'd_1', 'd_2', 'd_3', 'd_4', 'd_5', 'd_6', 'd_7', 'd_8', 'd_9',
