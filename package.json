@@ -1,0 +1,11 @@
+{
+  "name": "kawaii-gift-gachapon",
+  "private": true,
+  "version": "1.2.0",
+  "description": "เกมจับฉลากของขวัญ 2D สไตล์ Anime (พร้อม iOS Offline PWA & Single-File Bundle)",
+  "scripts": {
+    "start": "python3 server.py",
+    "dev": "python3 server.py",
+    "build:ios": "python3 scripts/build_ios_offline.py"
+  }
+}
